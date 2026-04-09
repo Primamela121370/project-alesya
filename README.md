@@ -1,60 +1,80 @@
-# ПРОЕКТ АЛЕСЯ
+﻿# Project Alesya: Landing + Admin CMS MVP
 
-Фронтенд на React + Vite с автодеплоем на GitHub Pages.
+Сайт репетитора на React + Vite с публичным лендингом и закрытой админкой.
 
-## Быстрый старт локально
+## Что внутри
+
+- Публичная часть: ` / `
+- Админка:
+  - `/admin/login`
+  - `/admin`
+  - `/admin/hero`
+  - `/admin/sections`
+  - `/admin/results`
+  - `/admin/testimonials`
+  - `/admin/faq`
+  - `/admin/contacts`
+  - `/admin/seo`
+  - `/admin/leads`
+
+Реализовано CRUD для hero, site settings, sections, section items, results, testimonials, faq, seo settings, leads.
+
+## Технологии
+
+- React + Vite + TypeScript
+- React Router
+- Supabase (Auth + Postgres + Storage)
+- Local fallback provider (для локального MVP без Supabase)
+
+## Локальный запуск
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Что уже настроено
+Открыть:
 
-- Автодеплой: `.github/workflows/deploy-pages.yml`
-- Скрипт пуша и деплоя: `DEPLOY-GITHUB.bat`
-- Скрипт первичной привязки удалённого репозитория: `SETUP-GITHUB-REMOTE.bat`
+- `http://localhost:5173/`
+- `http://localhost:5173/admin/login`
 
-## 1) Создать репозиторий на GitHub
+## Логин локального fallback
 
-1. На GitHub нажми `New repository`.
-2. Название: например `project-alesya`.
-3. Создай пустой репозиторий (без README, без .gitignore).
-4. Скопируй HTTPS URL вида:
-   `https://github.com/<your-user>/<your-repo>.git`
+Если Supabase env не задан, работает fallback-auth:
 
-## 2) Привязать локальный проект к GitHub (один раз)
+- login: `admin`
+- password: `121370`
 
-В терминале из папки проекта:
+Можно переопределить в `.env`:
 
-```bat
-SETUP-GITHUB-REMOTE.bat https://github.com/<your-user>/<your-repo>.git
+```env
+VITE_ADMIN_EMAIL=admin
+VITE_ADMIN_PASSWORD=121370
 ```
 
-## 3) Деплой одной командой
+## Подключение Supabase
 
-Каждый раз после изменений:
+1. Создайте проект в Supabase.
+2. Выполните SQL: [supabase/schema.sql](supabase/schema.sql)
+3. Добавьте `.env`:
 
-```bat
-DEPLOY-GITHUB.bat "обновление лендинга"
+```env
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
 ```
 
-Что происходит:
-- `git add -A`
-- `git commit`
-- `git push origin main`
-- GitHub Actions запускает деплой на GitHub Pages автоматически.
+4. Создайте admin-пользователя в Supabase Auth (email/password).
 
-## 4) Тестовый и основной домен
+## Проверки
 
-- Тестовый URL (из коробки):  
-  `https://<your-user>.github.io/<your-repo>/`
-- Основной домен (кастомный): на GitHub в `Settings -> Pages -> Custom domain` укажи свой домен.
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
 
-### DNS для основного домена
+## Деплой
 
-- Для `www` обычно ставят `CNAME` на `<your-user>.github.io`
-- Для корневого домена (`example.com`) обычно ставят `A` записи на IP GitHub Pages
-
-Актуальные IP/правила всегда проверяй в официальной документации GitHub Pages:
-https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site
+```powershell
+.\DEPLOY-GITHUB.bat "обновление"
+```
