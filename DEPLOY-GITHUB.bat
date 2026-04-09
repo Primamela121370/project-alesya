@@ -57,10 +57,16 @@ if errorlevel 1 (
     exit /b 1
   )
 ) else (
-  echo No new changes to commit. Continuing with push...
+  echo No new changes detected. Creating empty commit to trigger deploy...
+  git commit --allow-empty -m "%MSG% [empty trigger]"
+  if errorlevel 1 (
+    echo ERROR: Empty commit failed.
+    pause
+    exit /b 1
+  )
 )
 
-echo [5/5] Pushing to %BRANCH% (this triggers GitHub Pages deploy)...
+echo [5/5] Pushing to %BRANCH%...
 git push -u origin %BRANCH%
 if errorlevel 1 (
   echo ERROR: Push failed.
@@ -69,7 +75,9 @@ if errorlevel 1 (
 )
 
 echo.
-echo Success: code pushed and GitHub Actions deploy started.
-echo Check: GitHub ^> Actions ^> "Deploy To GitHub Pages"
+echo Success: commit and push completed.
+echo If GitHub Pages still fails, ensure the repository is PUBLIC
+echo or enable Pages for private repository on a paid plan.
+echo Check workflow status: GitHub ^> Actions ^> "Deploy To GitHub Pages"
 pause
 exit /b 0
