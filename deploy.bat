@@ -12,7 +12,7 @@ set "BRANCH=%~1"
 if "%BRANCH%"=="" set "BRANCH=main"
 
 set "MSG=%~2"
-if "%MSG%"=="" set "MSG=deploy: %date% %time%"
+if "%MSG%"=="" set "MSG=update: %date% %time%"
 
 echo.
 echo [1/4] Checking git repository...
@@ -52,12 +52,7 @@ if errorlevel 1 (
     exit /b 1
   )
 ) else (
-  echo No file changes, creating empty trigger commit...
-  git commit --allow-empty -m "%MSG% [trigger]"
-  if errorlevel 1 (
-    echo ERROR: Empty commit failed.
-    exit /b 1
-  )
+  echo No file changes. Skipping commit.
 )
 echo OK
 
@@ -72,4 +67,5 @@ echo OK
 
 echo.
 echo Done. Project was pushed to GitHub: branch "%BRANCH%".
+echo Next step: run GitHub Action "Deploy Olesiapro" manually and choose target (test or production).
 exit /b 0
