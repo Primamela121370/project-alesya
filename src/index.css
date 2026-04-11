@@ -104,6 +104,56 @@
   line-height: 1.6;
 }
 
+.hero-portrait-wrap {
+  isolation: isolate;
+}
+
+.hero-glass {
+  position: absolute;
+  inset: 20px -18px -18px 20px;
+  border-radius: 28px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.65), rgba(242, 235, 225, 0.45));
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  z-index: 0;
+}
+
+.hero-portrait {
+  box-shadow:
+    0 28px 64px -22px rgba(39, 28, 17, 0.36),
+    0 0 48px rgba(168, 82, 42, 0.1);
+}
+
+.hero-badge,
+.hero-proof {
+  animation: fadeUp 0.8s ease 0.6s both;
+}
+
+.bullet-chip {
+  transition: transform 0.28s ease, border-color 0.28s ease;
+}
+
+.bullet-chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-mid);
+}
+
+.timeline-grid .timeline-step {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .timeline-grid .timeline-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 38px;
+    right: -14px;
+    width: 28px;
+    height: 1px;
+    background: rgba(39, 28, 17, 0.2);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

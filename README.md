@@ -50,6 +50,7 @@ npm run dev
 ```env
 VITE_ADMIN_EMAIL=admin
 VITE_ADMIN_PASSWORD=121370
+VITE_YANDEX_METRIKA_ID=
 ```
 
 ## Подключение Supabase
@@ -64,6 +65,22 @@ VITE_SUPABASE_ANON_KEY=...
 ```
 
 4. Создайте admin-пользователя в Supabase Auth (email/password).
+
+## A/B + Яндекс.Метрика
+
+Для отправки событий в Яндекс.Метрику добавьте id счетчика в `.env`:
+
+```env
+VITE_YANDEX_METRIKA_ID=12345678
+```
+
+Отправляются цели:
+- `hero_variant_view` (параметр `variant`: `A` / `B`)
+- `hero_cta_click` (параметры `variant`, `placement`: `hero` / `sticky`)
+- `lead_submit` (параметр `variant`: `A` / `B`)
+
+Резервная локальная статистика A/B хранится в `localStorage`:
+- ключ: `alesya-hero-ab-stats-v1`
 
 ## Проверки
 
