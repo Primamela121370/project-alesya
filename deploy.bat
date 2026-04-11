@@ -63,7 +63,7 @@ echo OK
 
 echo.
 echo [4/4] Pushing to GitHub branch "%BRANCH%"...
-git push -u origin HEAD:%BRANCH%
+git push origin HEAD:%BRANCH%
 if errorlevel 1 (
   echo ERROR: Push failed. Check your GitHub access and branch protection settings.
   exit /b 1
