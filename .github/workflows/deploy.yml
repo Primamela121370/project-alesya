@@ -26,6 +26,18 @@ jobs:
         with:
           ref: ${{ inputs.source_ref }}
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
       - name: Set deploy path
         id: vars
         run: |
@@ -38,12 +50,23 @@ jobs:
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avz --delete --exclude='.git' --exclude='.env'
-          path: ./
+          switches: -avz --delete
+          path: ./dist/
           remote_path: ${{ steps.vars.outputs.path }}
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Verify deployed files
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -e
+            ls -la "${{ steps.vars.outputs.path }}" | head -n 20
+            test -f "${{ steps.vars.outputs.path }}/index.html"
 
       - name: Reload PHP-FPM
         uses: appleboy/ssh-action@v1.0.3
