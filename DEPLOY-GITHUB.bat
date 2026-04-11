@@ -1,13 +1,13 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableDelayedExpansion
 
 REM =====================================================
-REM  DEPLOY-GITHUB.bat — деплой проекта Алеся на сервер
+REM  DEPLOY-GITHUB.bat -- деплой проекта Алеся на сервер
 REM  Использование:
-REM    DEPLOY-GITHUB.bat              — спросит ветку
-REM    DEPLOY-GITHUB.bat main         — деплой на БОЕВОЙ
-REM    DEPLOY-GITHUB.bat test         — деплой на ТЕСТОВЫЙ
-REM    DEPLOY-GITHUB.bat main "fix"   — с произвольным сообщением
+REM    DEPLOY-GITHUB.bat              -- спросит ветку
+REM    DEPLOY-GITHUB.bat main         -- деплой на БОЕВОЙ
+REM    DEPLOY-GITHUB.bat test         -- деплой на ТЕСТОВЫЙ
+REM    DEPLOY-GITHUB.bat main "fix"   -- с произвольным сообщением
 REM =====================================================
 
 set "BRANCH=%~1"
@@ -25,7 +25,9 @@ if "%BRANCH%"=="" (
   if "!CHOICE!"=="2" set "BRANCH=test"
   if "!BRANCH!"=="" (
     echo Отмена.
-    pause
+    echo.
+    echo  Нажмите любую клавишу для закрытия...
+    pause >nul
     exit /b 1
   )
 )
@@ -43,10 +45,14 @@ REM --- [1/4] Проверка git ---
 echo [1/4] Проверка git-репозитория...
 git rev-parse --is-inside-work-tree >nul 2>&1
 if errorlevel 1 (
-  echo ОШИБКА: папка не является git-репозиторием.
-  pause
+  echo.
+  echo  ОШИБКА: папка не является git-репозиторием.
+  echo.
+  echo  Нажмите любую клавишу для закрытия...
+  pause >nul
   exit /b 1
 )
+echo  OK
 
 REM --- [2/4] Проверка remote ---
 echo [2/4] Проверка remote origin...
@@ -54,9 +60,16 @@ git remote get-url origin >nul 2>&1
 if errorlevel 1 (
   echo Remote origin не настроен.
   set /p "REMOTE_URL=Вставьте URL репозитория: "
-  if "%REMOTE_URL%"=="" ( echo Отмена. & pause & exit /b 1 )
-  git remote add origin "%REMOTE_URL%"
+  if "!REMOTE_URL!"=="" (
+    echo Отмена.
+    echo.
+    echo  Нажмите любую клавишу для закрытия...
+    pause >nul
+    exit /b 1
+  )
+  git remote add origin "!REMOTE_URL!"
 )
+echo  OK
 
 REM --- [3/4] Коммит ---
 echo [3/4] Добавление изменений и коммит...
@@ -64,24 +77,49 @@ git add -A
 git diff --cached --quiet
 if errorlevel 1 (
   git commit -m "%MSG%"
-  if errorlevel 1 ( echo ОШИБКА: коммит не удался. & pause & exit /b 1 )
+  if errorlevel 1 (
+    echo.
+    echo  ОШИБКА: коммит не удался.
+    echo.
+    echo  Нажмите любую клавишу для закрытия...
+    pause >nul
+    exit /b 1
+  )
 ) else (
-  echo Нет новых изменений -- пустой коммит для запуска деплоя...
+  echo  Нет новых изменений -- пустой коммит для запуска деплоя...
   git commit --allow-empty -m "%MSG% [trigger]"
+  if errorlevel 1 (
+    echo.
+    echo  ОШИБКА: пустой коммит не удался.
+    echo.
+    echo  Нажмите любую клавишу для закрытия...
+    pause >nul
+    exit /b 1
+  )
 )
+echo  OK
 
 REM --- [4/4] Push ---
 echo [4/4] Отправка в GitHub ^(ветка %BRANCH%^)...
 git push -u origin %BRANCH%
 if errorlevel 1 (
-  echo ОШИБКА: push не удался.
-  pause
+  echo.
+  echo  ОШИБКА: push не удался. Проверьте доступ к GitHub.
+  echo.
+  echo  Нажмите любую клавишу для закрытия...
+  pause >nul
   exit /b 1
 )
+echo  OK
 
 echo.
-echo  Готово! Деплой запущен автоматически через GitHub Actions.
+echo  ============================================
+echo   УСПЕХ! Деплой запущен.
+echo  ============================================
+echo.
+echo  GitHub Actions задеплоит файлы на сервер.
 echo  Статус: https://github.com/Primamela121370/project-alesya/actions
 echo.
-pause
+echo  Нажмите любую клавишу для закрытия...
+pause >nul
 exit /b 0
