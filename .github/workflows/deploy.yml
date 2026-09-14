@@ -1,5 +1,7 @@
 name: Deploy Olesiapro
 on:
+  push:
+    branches: [test]
   workflow_dispatch:
     inputs:
       target:
@@ -23,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.source_ref }}
+          ref: ${{ github.event_name == 'push' && github.sha || inputs.source_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -45,7 +47,7 @@ jobs:
           VITE_YANDEX_METRIKA_ID: ${{ vars.YANDEX_METRIKA_ID }}
         run: npm run build
       - name: Enforce TEST noindex
-        if: inputs.target == 'test'
+        if: github.event_name == 'push' || inputs.target == 'test'
         run: |
           sed -i 's#<!--app-head-->#<meta name="robots" content="noindex, nofollow, noarchive" /><!--app-head-->#' dist/index.html
           printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
