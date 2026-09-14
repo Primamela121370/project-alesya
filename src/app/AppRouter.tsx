@@ -1,9 +1,10 @@
-﻿import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AdminLayout } from '../components/admin/AdminLayout';
 import { ToastProvider } from '../components/common/ToastProvider';
 import { ProtectedRoute } from '../features/admin/auth/ProtectedRoute';
 import { AuthProvider } from '../features/admin/auth/AuthContext';
 import { PublicLandingPage } from '../features/public/PublicLandingPage';
+import { ContactLandingPage } from '../features/contact/ContactLandingPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminLoginPage } from '../pages/admin/AdminLoginPage';
 import { ContactsAdminPage } from '../pages/admin/ContactsAdminPage';
@@ -22,6 +23,7 @@ export function AppRouter() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<PublicLandingPage />} />
+            <Route path="/contact" element={<ContactLandingPage />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<AdminLayout />}>
