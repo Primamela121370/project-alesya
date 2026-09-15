@@ -1,0 +1,47 @@
+name: Diagnose TEST VPS
+
+on:
+  push:
+    branches: [test]
+    paths:
+      - .github/workflows/diagnose-test-vps.yml
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Inspect TEST nginx and files
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -u
+            echo '=== identity ==='
+            id
+            if sudo -n true 2>/dev/null; then
+              echo 'passwordless_sudo=yes'
+            else
+              echo 'passwordless_sudo=no'
+            fi
+
+            echo '=== deployed files ==='
+            ls -la /var/www/test.olesiapro.ru || true
+            test -f /var/www/test.olesiapro.ru/index.html && grep -n -m1 'id="root"' /var/www/test.olesiapro.ru/index.html || true
+
+            echo '=== enabled nginx sites ==='
+            ls -la /etc/nginx/sites-enabled || true
+            grep -RInE 'server_name|root |try_files|listen .*ssl|ssl_certificate' /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true
+
+            echo '=== nginx configuration test ==='
+            if sudo -n true 2>/dev/null; then
+              sudo nginx -t
+            else
+              nginx -t || true
+            fi
+
+            echo '=== local HTTP host check ==='
+            curl --silent --show-error --head --max-time 10 -H 'Host: test.olesiapro.ru' http://127.0.0.1/ || true
