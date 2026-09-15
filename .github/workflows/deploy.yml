@@ -52,12 +52,18 @@ jobs:
           sed -i 's#<!--app-head-->#<meta name="robots" content="noindex, nofollow, noarchive" /><!--app-head-->#' dist/index.html
           printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
           rm -f dist/sitemap.xml
+      - name: Materialize static route entry points
+        run: |
+          set -euo pipefail
+          mkdir -p dist/contact
+          cp dist/index.html dist/contact/index.html
       - name: Validate artifact
         run: |
           set -euo pipefail
           test -f dist/index.html
+          test -f dist/contact/index.html
           test -f dist/assets/*.js
-          if [ "${{ github.event_name == 'push' && 'test' || inputs.target }}" = test ]; then grep -q 'noindex' dist/index.html; else ! grep -q 'noindex' dist/index.html; fi
+          if [ "${{ github.event_name == 'push' && 'test' || inputs.target }}" = test ]; then grep -q 'noindex' dist/index.html; grep -q 'noindex' dist/contact/index.html; else ! grep -q 'noindex' dist/index.html; ! grep -q 'noindex' dist/contact/index.html; fi
       - id: vars
         run: |
           if [ "${{ github.event_name == 'push' && 'test' || inputs.target }}" = production ]; then echo 'path=/var/www/olesiapro.ru' >> "$GITHUB_OUTPUT"; echo 'url=https://olesiapro.ru/' >> "$GITHUB_OUTPUT"; else echo 'path=/var/www/test.olesiapro.ru' >> "$GITHUB_OUTPUT"; echo 'url=https://test.olesiapro.ru/' >> "$GITHUB_OUTPUT"; fi
@@ -79,6 +85,7 @@ jobs:
           script: |
             set -eu
             test -f '${{ steps.vars.outputs.path }}/index.html'
+            test -f '${{ steps.vars.outputs.path }}/contact/index.html'
             test -d '${{ steps.vars.outputs.path }}/assets'
       - name: HTTP smoke test
         run: |
@@ -87,4 +94,4 @@ jobs:
           grep -q 'id="root"' /tmp/live.html
           curl --fail --silent --show-error --location --retry 4 --retry-delay 3 --max-time 20 '${{ steps.vars.outputs.url }}contact' -o /tmp/live-contact.html
           grep -q 'id="root"' /tmp/live-contact.html
-          if [ "${{ github.event_name == 'push' && 'test' || inputs.target }}" = test ]; then grep -q 'noindex' /tmp/live.html; else ! grep -q 'noindex' /tmp/live.html; fi
+          if [ "${{ github.event_name == 'push' && 'test' || inputs.target }}" = test ]; then grep -q 'noindex' /tmp/live.html; grep -q 'noindex' /tmp/live-contact.html; else ! grep -q 'noindex' /tmp/live.html; ! grep -q 'noindex' /tmp/live-contact.html; fi
