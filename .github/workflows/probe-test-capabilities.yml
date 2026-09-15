@@ -1,0 +1,26 @@
+name: Probe TEST capabilities
+
+on:
+  push:
+    branches: [test]
+    paths:
+      - .github/workflows/probe-test-capabilities.yml
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Probe safe TEST capabilities
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -u
+            if sudo -n true 2>/dev/null; then echo 'SUDO_OK=yes'; else echo 'SUDO_OK=no'; fi
+            if test -f /var/www/test.olesiapro.ru/index.html; then echo 'TEST_INDEX=yes'; else echo 'TEST_INDEX=no'; fi
+            if grep -q 'try_files.*index.html' /etc/nginx/sites-available/test.olesiapro.ru 2>/dev/null; then echo 'SPA_FALLBACK=yes'; else echo 'SPA_FALLBACK=no'; fi
+            if curl --fail --silent --show-error --max-time 10 https://test.olesiapro.ru/contact | grep -q 'id="root"'; then echo 'CONTACT_OK=yes'; else echo 'CONTACT_OK=no'; fi
